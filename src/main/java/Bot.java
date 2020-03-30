@@ -2,9 +2,18 @@ import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
     public static void main(String[] args) {
@@ -21,9 +30,9 @@ public class Bot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
-        message.setReplyToMessageId(receivedMessage.getMessageId());
         message.setText(text);
         try{
+            setButtons(message);
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -31,14 +40,73 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public void onUpdateReceived(Update update) {
-        Message message = update.getMessage();
-        if (message != null && message.hasText()){
-            switch (message.getText()){
-                case "/help":
-                    sendMessage(message, "Help");
-                    break;
+        if (update.hasMessage()) {
+            Message message = update.getMessage();
+            if (message.hasText()) {
+                switch (message.getText()) {
+                    case "/start":
+                        sendMessage(message, "Welcome to Recipe Book Bot");
+                        break;
+                    case "Help":
+                        sendMessage(message, "Help");
+                        break;
+                    case "List":
+                        sendList(message);
+                        break;
+                }
             }
         }
+        else if (update.hasCallbackQuery())
+        {
+             CallbackQuery callbackQuery = update.getCallbackQuery();
+             sendMessage(callbackQuery.getMessage(), callbackQuery.getData());
+        }
+    }
+
+    public void sendList(Message receivedMessage){
+        SendMessage message = new SendMessage();
+        message.enableMarkdown(true);
+        message.setChatId(receivedMessage.getChatId().toString());
+        message.setText("Recipe list");
+
+        List<String> recipes = new ArrayList<>();
+        recipes.add("Pasta");
+        recipes.add("Steak");
+        recipes.add("Rice");
+
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        for (String recipe : recipes){
+            List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(recipe);
+            button.setCallbackData("Recipe: " + recipe);
+            buttonsRow.add(button);
+            buttons.add(buttonsRow);
+        }
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(buttons);
+        message.setReplyMarkup(keyboard);
+
+        try{
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setButtons(SendMessage sendMessage) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        List<KeyboardRow> keyboardRowList = new ArrayList<>();
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add(new KeyboardButton("Help"));
+        keyboardRow.add(new KeyboardButton("List"));
+        keyboardRowList.add(keyboardRow);
+        replyKeyboardMarkup.setKeyboard(keyboardRowList);
+
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
     }
 
     public String getBotUsername() {
