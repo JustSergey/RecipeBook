@@ -12,10 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
+    static RecipeService recipeService = new RecipeService();
+
     public static void main(String[] args) {
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
@@ -51,7 +55,8 @@ public class Bot extends TelegramLongPollingBot {
                         sendMessage(message, "Help");
                         break;
                     case "List":
-                        sendList(message);
+                        List<Recipe> recipes = recipeService.getAll();
+                        sendList(message, recipes);
                         break;
                     case "Name":
                         sendMessage(message, message.getFrom().getUserName());
@@ -64,23 +69,18 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendList(Message receivedMessage) {
+    public void sendList(Message receivedMessage, List<Recipe> recipes) {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
         message.setText("Recipe list");
 
-        List<String> recipes = new ArrayList<>();
-        recipes.add("Pasta");
-        recipes.add("Steak");
-        recipes.add("Rice");
-
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-        for (String recipe : recipes) {
+        for (Recipe recipe : recipes) {
             List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
-            button.setText(recipe);
-            button.setCallbackData("Recipe: " + recipe);
+            button.setText(recipe.getTitle());
+            button.setCallbackData("Recipe: " + recipe.getInstruction());
             buttonsRow.add(button);
             buttons.add(buttonsRow);
         }

@@ -1,7 +1,9 @@
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "RecipesIngredients")
+@IdClass(RecipeIngredientId.class)
 public class RecipeIngredient {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

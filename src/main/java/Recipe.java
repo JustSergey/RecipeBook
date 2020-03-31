@@ -3,6 +3,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "Recipes")
+@NamedQuery(name = "Recipe.getAll", query = "SELECT r from Recipe r")
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,7 +29,7 @@ public class Recipe {
     private List<Ingredient> ingredients;
      */
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredient> recipesIngredients;
 
     public Recipe() {
@@ -42,5 +43,13 @@ public class Recipe {
         this.portions = portions;
         this.time = time;
         this.instruction = instruction;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+
+    public String getInstruction(){
+        return instruction;
     }
 }
