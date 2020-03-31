@@ -19,19 +19,19 @@ public class Bot extends TelegramLongPollingBot {
     public static void main(String[] args) {
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-        try{
+        try {
             telegramBotsApi.registerBot(new Bot());
-        } catch (TelegramApiException e){
+        } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
     public void sendMessage(Message receivedMessage, String text) {
         SendMessage message = new SendMessage();
-        message.enableMarkdown(true);
+        //message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
         message.setText(text);
-        try{
+        try {
             setButtons(message);
             execute(message);
         } catch (TelegramApiException e) {
@@ -53,17 +53,18 @@ public class Bot extends TelegramLongPollingBot {
                     case "List":
                         sendList(message);
                         break;
+                    case "Name":
+                        sendMessage(message, message.getFrom().getUserName());
+                        break;
                 }
             }
-        }
-        else if (update.hasCallbackQuery())
-        {
-             CallbackQuery callbackQuery = update.getCallbackQuery();
-             sendMessage(callbackQuery.getMessage(), callbackQuery.getData());
+        } else if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            sendMessage(callbackQuery.getMessage(), callbackQuery.getData());
         }
     }
 
-    public void sendList(Message receivedMessage){
+    public void sendList(Message receivedMessage) {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
@@ -75,7 +76,7 @@ public class Bot extends TelegramLongPollingBot {
         recipes.add("Rice");
 
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
-        for (String recipe : recipes){
+        for (String recipe : recipes) {
             List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(recipe);
@@ -86,7 +87,7 @@ public class Bot extends TelegramLongPollingBot {
         InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(buttons);
         message.setReplyMarkup(keyboard);
 
-        try{
+        try {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
