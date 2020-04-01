@@ -6,7 +6,7 @@ import java.util.List;
 public class RecipeService {
     public EntityManager em = Persistence.createEntityManagerFactory("COLIBRI").createEntityManager();
 
-    public void add(Recipe recipe){
+    public void add(Recipe recipe) {
         em.getTransaction().begin();
         Recipe recipeDB = em.merge(recipe);
         em.getTransaction().commit();
@@ -14,6 +14,10 @@ public class RecipeService {
 
     public List<Recipe> getAll() {
         TypedQuery<Recipe> recipes = em.createNamedQuery("Recipe.getAll", Recipe.class);
-        return  recipes.getResultList();
+        return recipes.getResultList();
+    }
+
+    public Recipe get(int id) {
+        return em.find(Recipe.class, id);
     }
 }

@@ -11,10 +11,14 @@ public class Ingredient {
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL)
     private List<RecipeIngredient> recipesIngredients;
 
-    public Ingredient(){
+    public Ingredient() {
     }
 
-    public Ingredient(String title){
+    public Ingredient(String title) {
         this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

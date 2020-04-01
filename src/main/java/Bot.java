@@ -12,8 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,22 +49,38 @@ public class Bot extends TelegramLongPollingBot {
                     case "/start":
                         sendMessage(message, "Welcome to Recipe Book Bot");
                         break;
-                    case "Help":
-                        sendMessage(message, "Help");
-                        break;
                     case "List":
                         List<Recipe> recipes = recipeService.getAll();
                         sendList(message, recipes);
-                        break;
-                    case "Name":
-                        sendMessage(message, message.getFrom().getUserName());
                         break;
                 }
             }
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
-            sendMessage(callbackQuery.getMessage(), callbackQuery.getData());
+            int id = Integer.parseInt(callbackQuery.getData());
+            Recipe recipe = recipeService.get(id);
+            sendMessage(callbackQuery.getMessage(), getRecipeInfo(recipe));
         }
+    }
+
+    private String getRecipeInfo(Recipe recipe) {
+        StringBuilder info = new StringBuilder(recipe.getTitle() + "\n" +
+                "-----------------\n" +
+                "Type: " + recipe.getType() + "\n" +
+                "Meal: " + recipe.getMeal() + "\n" +
+                "Cuisine: " + recipe.getCuisine() + "\n" +
+                recipe.getPortions() + " portions\n" +
+                "Cooking time: " + recipe.getTime() + "\n" +
+                "Author: " + recipe.getAuthor().getUserName() + "\n" +
+                "-----------------\n" +
+                "Ingredients:\n");
+
+        List<RecipeIngredient> ingredients = recipe.getIngredients();
+        for (RecipeIngredient ingredient : ingredients) {
+            info.append(ingredient.getIngredient().getTitle()).append(": ").append(ingredient.getAmount()).append("\n");
+        }
+        info.append("-----------------\n" + "Instruction:\n").append(recipe.getInstruction());
+        return info.toString();
     }
 
     public void sendList(Message receivedMessage, List<Recipe> recipes) {
@@ -80,7 +94,7 @@ public class Bot extends TelegramLongPollingBot {
             List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(recipe.getTitle());
-            button.setCallbackData("Recipe: " + recipe.getInstruction());
+            button.setCallbackData(Integer.toString(recipe.getId()));
             buttonsRow.add(button);
             buttons.add(buttonsRow);
         }
@@ -102,7 +116,6 @@ public class Bot extends TelegramLongPollingBot {
 
         List<KeyboardRow> keyboardRowList = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add(new KeyboardButton("Help"));
         keyboardRow.add(new KeyboardButton("List"));
         keyboardRowList.add(keyboardRow);
         replyKeyboardMarkup.setKeyboard(keyboardRowList);

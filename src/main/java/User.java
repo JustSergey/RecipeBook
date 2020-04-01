@@ -13,12 +13,16 @@ public class User {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Recipe> recipes;
 
-    public  User() {
+    public User() {
     }
 
-    public User(String userName){
+    public User(String userName) {
         this.userName = userName;
         permission = "user";
         recipes = new ArrayList<>();
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }

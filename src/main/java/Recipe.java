@@ -1,4 +1,5 @@
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,24 +19,13 @@ public class Recipe {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "authorId")
     private User author;
-
-    /*
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "RecipesIngredients",
-            joinColumns =  { @JoinColumn(name = "recipeId") },
-            inverseJoinColumns = { @JoinColumn(name = "ingredientId" ) }
-            )
-    private List<Ingredient> ingredients;
-     */
-
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredient> recipesIngredients;
 
     public Recipe() {
     }
 
-    public Recipe(String title, String type, String meal, String cuisine, int portions, String time, String instruction){
+    public Recipe(String title, String type, String meal, String cuisine, int portions, String time, String instruction) {
         this.title = title;
         this.type = type;
         this.meal = meal;
@@ -45,11 +35,43 @@ public class Recipe {
         this.instruction = instruction;
     }
 
-    public String getTitle(){
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
         return title;
     }
 
-    public String getInstruction(){
+    public String getType() {
+        return type;
+    }
+
+    public String getMeal() {
+        return meal;
+    }
+
+    public String getCuisine() {
+        return cuisine;
+    }
+
+    public int getPortions() {
+        return portions;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public String getInstruction() {
         return instruction;
+    }
+
+    public List<RecipeIngredient> getIngredients() {
+        return recipesIngredients;
     }
 }

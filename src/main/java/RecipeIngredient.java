@@ -15,12 +15,20 @@ public class RecipeIngredient {
     private Ingredient ingredient;
     private String amount;
 
-    public RecipeIngredient(){
+    public RecipeIngredient() {
     }
 
-    public RecipeIngredient(Recipe recipe, Ingredient ingredient, String amount){
+    public RecipeIngredient(Recipe recipe, Ingredient ingredient, String amount) {
         this.recipe = recipe;
         this.ingredient = ingredient;
         this.amount = amount;
+    }
+
+    public Ingredient getIngredient() {
+        return ingredient;
+    }
+
+    public String getAmount() {
+        return amount;
     }
 }
