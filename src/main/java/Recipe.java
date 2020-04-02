@@ -1,3 +1,5 @@
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ public class Recipe {
     private String cuisine;
     private int portions;
     private String time;
+    @Type(type = "text")
     private String instruction;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "authorId")

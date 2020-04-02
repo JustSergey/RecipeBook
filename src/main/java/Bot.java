@@ -47,9 +47,9 @@ public class Bot extends TelegramLongPollingBot {
             if (message.hasText()) {
                 switch (message.getText()) {
                     case "/start":
-                        sendMessage(message, "Welcome to Recipe Book Bot");
+                        sendMessage(message, "Добро пожаловать в Книгу рецептов");
                         break;
-                    case "List":
+                    case "Список":
                         List<Recipe> recipes = recipeService.getAll();
                         sendList(message, recipes);
                         break;
@@ -66,18 +66,18 @@ public class Bot extends TelegramLongPollingBot {
     private String getRecipeInfo(Recipe recipe) {
         StringBuilder info = new StringBuilder(recipe.getTitle() + "\n" +
                 "--------------------\n" +
-                "Тип:  " + recipe.getType() + "\n" +
-                "Трапеза:  " + recipe.getMeal() + "\n" +
-                "Кухня:  " + recipe.getCuisine() + "\n" +
-                "Количество:  " + recipe.getPortions() + " порций\n" +
-                "Время готовки:  " + recipe.getTime() + "\n" +
-                "Автор:  " + recipe.getAuthor().getUserName() + "\n" +
+                "Тип:   " + recipe.getType() + "\n" +
+                "Трапеза:   " + recipe.getMeal() + "\n" +
+                "Кухня:    " + recipe.getCuisine() + "\n" +
+                "Количество:    " + recipe.getPortions() + " порций\n" +
+                "Время готовки:   " + recipe.getTime() + "\n" +
+                "Автор:   " + recipe.getAuthor().getUserName() + "\n" +
                 "--------------------\n" +
                 "Ингредиенты:\n");
 
         List<RecipeIngredient> ingredients = recipe.getIngredients();
         for (RecipeIngredient ingredient : ingredients) {
-            info.append(ingredient.getIngredient().getTitle()).append(":  ").append(ingredient.getAmount()).append("\n");
+            info.append(ingredient.getIngredient().getTitle()).append(":   ").append(ingredient.getAmount()).append("\n");
         }
         info.append("--------------------\n" + "Инструкция:\n").append(recipe.getInstruction());
         return info.toString();
@@ -87,7 +87,7 @@ public class Bot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
-        message.setText("Recipe list");
+        message.setText("Выберите рецепт:");
 
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         for (Recipe recipe : recipes) {
@@ -116,7 +116,7 @@ public class Bot extends TelegramLongPollingBot {
 
         List<KeyboardRow> keyboardRowList = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add(new KeyboardButton("List"));
+        keyboardRow.add(new KeyboardButton("Список"));
         keyboardRowList.add(keyboardRow);
         replyKeyboardMarkup.setKeyboard(keyboardRowList);
 
