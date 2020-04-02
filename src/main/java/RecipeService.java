@@ -4,7 +4,7 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class RecipeService {
-    public EntityManager em = Persistence.createEntityManagerFactory("COLIBRI").createEntityManager();
+    public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
 
     public void add(Recipe recipe) {
         em.getTransaction().begin();
