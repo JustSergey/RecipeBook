@@ -4,6 +4,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "Users")
+@NamedQuery(name = "User.getAll", query = "SELECT u from User u")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,5 +25,8 @@ public class User {
 
     public String getUserName() {
         return userName;
+    }
+    public String getPermission() {
+        return permission;
     }
 }
