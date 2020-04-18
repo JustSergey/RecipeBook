@@ -6,10 +6,11 @@ import java.util.List;
 public class UserService {
     public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
 
-    public void add(User user) {
+    public User add(User user) {
         em.getTransaction().begin();
-        User recipeDB = em.merge(user);
+        User userDB = em.merge(user);
         em.getTransaction().commit();
+        return userDB;
     }
 
     public List<User> getAll() {

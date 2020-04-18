@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
-    static RecipeService recipeService = new RecipeService();
-    static UserService userService = new UserService();
-    static List<Chat> processingChats = new ArrayList<>();
+    public RecipeService recipeService = new RecipeService();
+    public UserService userService = new UserService();
+    public IngredientService ingredientService = new IngredientService();
+    public RecipeIngredientService recipeIngredientService = new RecipeIngredientService();
+    public List<Chat> processingChats = new ArrayList<>();
 
     public static void main(String[] args) {
         ApiContextInitializer.init();
@@ -30,7 +32,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendMessage(Message receivedMessage, String text, ReplyKeyboardMarkup keyboard) {
+    public void sendMessage(Message receivedMessage, String text, ReplyKeyboardMarkup keyboard) {
         SendMessage sendMessage = new SendMessage();
         //message.enableMarkdown(true);
         sendMessage.setChatId(receivedMessage.getChatId().toString());
@@ -48,23 +50,35 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage()) {
             Message message = update.getMessage();
             if (message.hasText()) {
-                ReplyKeyboardMarkup keyboard;
-                switch (message.getText()) {
-                    case "/start":
-                        keyboard = getKeyboard(message.getChat().getUserName());
-                        sendMessage(message, "Добро пожаловать в Книгу рецептов", keyboard);
-                        break;
-                    case "/update":
-                        keyboard = getKeyboard(message.getChat().getUserName());
-                        sendMessage(message, "Клавиатура обновлена", keyboard);
-                        break;
-                    case "Список":
-                        List<Recipe> recipes = recipeService.getAll();
-                        sendList(message, recipes);
-                        break;
-                    case "Добавить":
-                        sendMessage(message, "Введите название", null);
-                        break;
+                Chat chat = FindChat(processingChats, message.getChatId());
+                if (chat != null) {
+                    if (!chat.execute(message, this))
+                        processingChats.remove(chat);
+                } else {
+                    ReplyKeyboardMarkup keyboard;
+                    switch (message.getText()) {
+                        case "/start":
+                            keyboard = getKeyboard(message.getChat().getUserName());
+                            sendMessage(message, "Добро пожаловать в Книгу рецептов", keyboard);
+                            break;
+                        case "/update":
+                            keyboard = getKeyboard(message.getChat().getUserName());
+                            sendMessage(message, "Клавиатура обновлена", keyboard);
+                            break;
+                        case "Список":
+                            List<Recipe> recipes = recipeService.getAll();
+                            sendRecipeList(message, recipes);
+                            break;
+                        case "Добавить рецепт":
+                            User user = getUser(message.getChat().getUserName());
+                            if (user != null && user.getPermission().equals("admin")){
+                                processingChats.add(new Chat(message.getChatId(), "AddRecipe"));
+                                sendMessage(message, "Введите название", null);
+                            }
+                            break;
+                        case "Удалить рецепт":
+                            break;
+                    }
                 }
             }
         } else if (update.hasCallbackQuery()) {
@@ -75,27 +89,46 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    private Chat FindChat(List<Chat> chats, Long id) {
+        for (Chat chat : chats) {
+            if (chat.getId().equals(id)) {
+                return  chat;
+            }
+        }
+        return null;
+    }
+
+    public User getUser(String userName){
+        List<User> users = userService.getAll();
+        for (User user : users) {
+            if (user.getUserName().equals(userName)){
+                return user;
+            }
+        }
+        return null;
+    }
+
     private String getRecipeInfo(Recipe recipe) {
-        StringBuilder info = new StringBuilder(recipe.getTitle() + "\n" +
-                "--------------------\n" +
-                "Тип:    " + recipe.getType() + "\n" +
-                "Трапеза:    " + recipe.getMeal() + "\n" +
-                "Кухня:    " + recipe.getCuisine() + "\n" +
-                "Порций:    " + recipe.getPortions() + "\n" +
-                "Время готовки:    " + recipe.getTime() + "\n" +
-                "Автор:    " + recipe.getAuthor().getUserName() + "\n" +
-                "--------------------\n" +
-                "Ингредиенты:\n");
+        StringBuilder info = new StringBuilder(recipe.getTitle() + "\n");
+        info.append("--------------------\n");
+        info.append("Тип:    ").append(recipe.getType()).append("\n");
+        info.append("Трапеза:    ").append(recipe.getMeal()).append("\n");
+        info.append("Кухня:    ").append(recipe.getCuisine()).append("\n");
+        info.append("Порций:    ").append(recipe.getPortions()).append("\n");
+        info.append("Время готовки:    ").append(recipe.getTime()).append("\n");
+        info.append("Автор:    ").append(recipe.getAuthor().getUserName()).append("\n");
+        info.append("--------------------\n");
+        info.append("Ингредиенты:\n");
 
         List<RecipeIngredient> ingredients = recipe.getIngredients();
         for (RecipeIngredient ingredient : ingredients) {
             info.append(ingredient.getIngredient().getTitle()).append(":    ").append(ingredient.getAmount()).append("\n");
         }
-        info.append("--------------------\n" + "Инструкция:\n").append(recipe.getInstruction());
+        info.append("--------------------\n").append("Инструкция:\n").append(recipe.getInstruction());
         return info.toString();
     }
 
-    private void sendList(Message receivedMessage, List<Recipe> recipes) {
+    public void sendRecipeList(Message receivedMessage, List<Recipe> recipes) {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setChatId(receivedMessage.getChatId().toString());
@@ -106,7 +139,7 @@ public class Bot extends TelegramLongPollingBot {
             List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(recipe.getTitle());
-            button.setCallbackData(Integer.toString(recipe.getId()));
+            button.setCallbackData("r" + recipe.getId());
             buttonsRow.add(button);
             buttons.add(buttonsRow);
         }
@@ -127,21 +160,19 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
 
         String permission = "user";
-        List<User> users = userService.getAll();
-        for (User user : users) {
-            if (user.getUserName().equals(userName)){
-                permission = user.getPermission();
-            }
+        User user = getUser(userName);
+        if (user != null) {
+            permission = user.getPermission();
         }
 
         List<KeyboardRow> keyboardRowList = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRow.add(new KeyboardButton("Список"));
         keyboardRowList.add(keyboardRow);
-        if ("admin".equals(permission)) {
+        if (permission.equals("admin")) {
             keyboardRow = new KeyboardRow();
-            keyboardRow.add(new KeyboardButton("Добавить"));
-            keyboardRow.add(new KeyboardButton("Удалить"));
+            keyboardRow.add(new KeyboardButton("Добавить рецепт"));
+            keyboardRow.add(new KeyboardButton("Удалить рецепт"));
             keyboardRowList.add(keyboardRow);
         }
         replyKeyboardMarkup.setKeyboard(keyboardRowList);

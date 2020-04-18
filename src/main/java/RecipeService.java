@@ -6,10 +6,11 @@ import java.util.List;
 public class RecipeService {
     public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
 
-    public void add(Recipe recipe) {
+    public Recipe add(Recipe recipe) {
         em.getTransaction().begin();
         Recipe recipeDB = em.merge(recipe);
         em.getTransaction().commit();
+        return recipeDB;
     }
 
     public List<Recipe> getAll() {

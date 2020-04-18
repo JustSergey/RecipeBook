@@ -28,7 +28,7 @@ public class Recipe {
     public Recipe() {
     }
 
-    public Recipe(String title, String type, String meal, String cuisine, int portions, String time, String instruction) {
+    public Recipe(String title, String type, String meal, String cuisine, int portions, String time, String instruction, User author) {
         this.title = title;
         this.type = type;
         this.meal = meal;
@@ -36,6 +36,7 @@ public class Recipe {
         this.portions = portions;
         this.time = time;
         this.instruction = instruction;
+        this.author = author;
     }
 
     public int getId() {
