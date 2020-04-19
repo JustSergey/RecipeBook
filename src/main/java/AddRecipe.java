@@ -73,17 +73,19 @@ public class AddRecipe implements CommandHandler {
         List<Ingredient> ingredientsDB = bot.ingredientService.getAll();
         for (String ingredient : ingredients) {
             String[] ingredientAmount = ingredient.split(":");
-            Ingredient ingredientDB = getIngredient(ingredientsDB, ingredientAmount[0]);
-            if (ingredientDB == null)
-                ingredientDB = bot.ingredientService.add(new Ingredient(ingredientAmount[0]));
-            result.add(new RecipeIngredient(null, ingredientDB, ingredientAmount[1]));
+            if (ingredientAmount.length == 2 && ingredientAmount[0].length() > 0 && ingredientAmount[1].length() > 0) {
+                Ingredient ingredientDB = getIngredient(ingredientsDB, ingredientAmount[0]);
+                if (ingredientDB == null)
+                    ingredientDB = bot.ingredientService.add(new Ingredient(ingredientAmount[0]));
+                result.add(new RecipeIngredient(null, ingredientDB, ingredientAmount[1]));
+            }
         }
         return result;
     }
 
     private Ingredient getIngredient(List<Ingredient> ingredients, String title) {
         for (Ingredient ingredient : ingredients){
-            if (ingredient.getTitle().equals((title)))
+            if (ingredient.getTitle().toLowerCase().equals((title.toLowerCase())))
                 return  ingredient;
         }
         return null;

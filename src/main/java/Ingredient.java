@@ -6,7 +6,7 @@ import java.util.List;
 @NamedQuery(name = "Ingredient.getAll", query = "SELECT i from Ingredient i")
 public class Ingredient {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private int id;
     private String title;
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL)

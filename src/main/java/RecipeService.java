@@ -13,6 +13,12 @@ public class RecipeService {
         return recipeDB;
     }
 
+    public void delete(int id) {
+        em.getTransaction().begin();
+        em.remove(get(id));
+        em.getTransaction().commit();
+    }
+
     public List<Recipe> getAll() {
         TypedQuery<Recipe> recipes = em.createNamedQuery("Recipe.getAll", Recipe.class);
         return recipes.getResultList();

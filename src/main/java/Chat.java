@@ -10,6 +10,9 @@ public class Chat {
             case "AddRecipe":
                 handler = new AddRecipe();
                 break;
+            case "RemoveRecipe":
+                handler = new RemoveRecipe();
+                break;
         }
     }
 

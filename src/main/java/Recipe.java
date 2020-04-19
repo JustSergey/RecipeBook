@@ -9,7 +9,7 @@ import java.util.List;
 @NamedQuery(name = "Recipe.getAll", query = "SELECT r from Recipe r")
 public class Recipe {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private int id;
     private String title;
     private String type;

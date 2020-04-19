@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,8 @@ public class Bot extends TelegramLongPollingBot {
                     if (!chat.execute(message, this))
                         processingChats.remove(chat);
                 } else {
+                    List<Recipe> recipes;
+                    User user;
                     ReplyKeyboardMarkup keyboard;
                     switch (message.getText()) {
                         case "/start":
@@ -66,26 +69,46 @@ public class Bot extends TelegramLongPollingBot {
                             sendMessage(message, "Клавиатура обновлена", keyboard);
                             break;
                         case "Список":
-                            List<Recipe> recipes = recipeService.getAll();
+                            recipes = recipeService.getAll();
                             sendRecipeList(message, recipes);
                             break;
                         case "Добавить рецепт":
-                            User user = getUser(message.getChat().getUserName());
-                            if (user != null && user.getPermission().equals("admin")){
+                            user = getUser(message.getChat().getUserName());
+                            if (user != null && user.getPermission().equals("admin")) {
                                 processingChats.add(new Chat(message.getChatId(), "AddRecipe"));
                                 sendMessage(message, "Введите название", null);
                             }
                             break;
                         case "Удалить рецепт":
+                            user = getUser(message.getChat().getUserName());
+                            if (user != null && user.getPermission().equals("admin")) {
+                                processingChats.add(new Chat(message.getChatId(), "RemoveRecipe"));
+                                recipes = recipeService.getAll();
+                                sendRecipeList(message, recipes);
+                            }
                             break;
                     }
                 }
             }
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
-            int id = Integer.parseInt(callbackQuery.getData());
-            Recipe recipe = recipeService.get(id);
-            sendMessage(callbackQuery.getMessage(), getRecipeInfo(recipe), null);
+            Chat chat = FindChat(processingChats, callbackQuery.getMessage().getChatId());
+            if (chat != null) {
+                Message message = callbackQuery.getMessage();
+                try {
+                    Field text = Message.class.getDeclaredField("text");
+                    text.setAccessible(true);
+                    text.set(message, callbackQuery.getData());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (!chat.execute(message, this))
+                    processingChats.remove(chat);
+            } else {
+                int id = Integer.parseInt(callbackQuery.getData());
+                Recipe recipe = recipeService.get(id);
+                sendMessage(callbackQuery.getMessage(), getRecipeInfo(recipe), null);
+            }
         }
     }
 
@@ -139,7 +162,7 @@ public class Bot extends TelegramLongPollingBot {
             List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(recipe.getTitle());
-            button.setCallbackData("r" + recipe.getId());
+            button.setCallbackData(Integer.toString(recipe.getId()));
             buttonsRow.add(button);
             buttons.add(buttonsRow);
         }
