@@ -13,6 +13,17 @@ public class Chat {
             case "RemoveRecipe":
                 handler = new RemoveRecipe();
                 break;
+            case "FindByCuisine":
+                handler = new FindByCuisine();
+                break;
+            case "FindByMeal":
+                handler = new FindByMeal();
+                break;
+            case "FindByType":
+                handler = new FindByType();
+                break;
+            case "FindByIngredients":
+                handler = new FindByIngredients();
         }
     }
 

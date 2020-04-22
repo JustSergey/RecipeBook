@@ -1,4 +1,5 @@
 import javax.persistence.EntityManager;
+import javax.persistence.NamedQuery;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.util.List;
@@ -24,7 +25,38 @@ public class RecipeService {
         return recipes.getResultList();
     }
 
-    public Recipe get(int id) {
-        return em.find(Recipe.class, id);
+    public List<String> getButtons(String filter){
+        String query = "SELECT DISTINCT(c."+filter+") from Recipe c";
+        TypedQuery<String> cuisines = em.createQuery(query, String.class);
+        return cuisines.getResultList();
+    }
+
+    public  List<Recipe> getByType(String type){
+        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.type LIKE :type" , Recipe.class)
+                .setParameter("type", type);
+        return recipes.getResultList();
+    }
+
+    public  List<Recipe> getByIngredients(String product){
+        List<Recipe> recipes= em.createNativeQuery("SELECT * from recipes " +
+                "inner join recipesingredients as ri on recipes.id = ri.recipeid " +
+                "inner join ingredients  on ri.ingredientid = ingredients.id " +
+                "where ingredients.title = '"+product+"'", Recipe.class).getResultList();
+        return recipes;
+    }
+
+    public  List<Recipe> getByCuisine(String cuisine){
+        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.cuisine LIKE :chosenCuisine" , Recipe.class)
+                .setParameter("chosenCuisine", cuisine);
+        return recipes.getResultList();
+    }
+
+    public  List<Recipe> getByMeal(String meal){
+        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.meal LIKE :chosenMeal" , Recipe.class)
+                .setParameter("chosenMeal", meal);
+        return recipes.getResultList();
+    }
+
+    public Recipe get(int id) {return em.find(Recipe.class, id);
     }
 }
