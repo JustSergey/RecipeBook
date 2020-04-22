@@ -1,33 +1,47 @@
 import org.telegram.telegrambots.meta.api.objects.Message;
 
+import java.util.List;
+
 public class RemoveRecipe implements CommandHandler {
     private int step;
+    private int permission;
     private int id;
 
-    public RemoveRecipe() {step = 2;}
+    public RemoveRecipe() {
+        step = 3;
+        permission = 1;
+    }
 
-    public boolean execute(Message receivedMessage, Bot bot) {
+    public int getPermission() {
+        return permission;
+    }
+
+    public CommandHandler getInstance(){
+        return new RemoveRecipe();
+    }
+
+    public HandlerResult handle(Message receivedMessage, String data) {
         step--;
         switch (step) {
+            case 2:
+                List<Recipe> recipes = Services.recipeService.getAll();
+                return HandlerResult.getRecipeListResult(receivedMessage, recipes, false);
             case 1:
                 try {
-                    id = Integer.parseInt(receivedMessage.getText());
-                    String title = bot.recipeService.get(id).getTitle();
-                    bot.sendMessage(receivedMessage, "Удалить рецепт " + title + "? (Да/Нет)", null);
-                    return true;
+                    id = Integer.parseInt(data);
+                    String title = Services.recipeService.get(id).getTitle();
+                    return HandlerResult.getTextResult(receivedMessage, "Удалить рецепт " + title + "? (Да/Нет)", false);
                 } catch (Exception e){
-                    bot.sendMessage(receivedMessage, "Не удалось удалить рецепт", null);
-                    return true;
+                    return HandlerResult.getTextResult(receivedMessage, "Не удалось удалить рецепт", true);
                 }
             case 0:
-                if (receivedMessage.getText().equals("Да")){
-                    bot.recipeService.delete(id);
-                    bot.sendMessage(receivedMessage, "Рецепт удален", null);
+                if (data.equals("Да")){
+                    Services.recipeService.delete(id);
+                    return HandlerResult.getTextResult(receivedMessage, "Рецепт удален", true);
                 }
                 else
-                    bot.sendMessage(receivedMessage, "Удаление отменено", null);
-                return false;
+                    return HandlerResult.getTextResult(receivedMessage, "Удаление отменено", true);
         }
-        return false;
+        return null;
     }
 }

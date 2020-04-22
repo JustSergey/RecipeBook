@@ -1,17 +1,23 @@
 import javax.persistence.EntityManager;
-import javax.persistence.NamedQuery;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class RecipeService {
-    public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
+    private EntityManager em;
+
+    public RecipeService(EntityManager em) {
+        this.em = em;
+    }
 
     public Recipe add(Recipe recipe) {
         em.getTransaction().begin();
         Recipe recipeDB = em.merge(recipe);
         em.getTransaction().commit();
         return recipeDB;
+    }
+
+    public void refresh(Recipe recipe){
+        em.refresh(recipe);
     }
 
     public void delete(int id) {
@@ -38,11 +44,10 @@ public class RecipeService {
     }
 
     public  List<Recipe> getByIngredients(String product){
-        List<Recipe> recipes= em.createNativeQuery("SELECT * from recipes " +
-                "inner join recipesingredients as ri on recipes.id = ri.recipeid " +
-                "inner join ingredients  on ri.ingredientid = ingredients.id " +
-                "where ingredients.title = '"+product+"'", Recipe.class).getResultList();
-        return recipes;
+        String query = "SELECT * from recipes\n" + "inner join recipesingredients as ri on recipes.id = ri.recipeid\n" +
+                "inner join ingredients  on ri.ingredientid = ingredients.id\n" +
+                "where ingredients.title = " + product;
+        return em.createNativeQuery(query, Recipe.class).getResultList();
     }
 
     public  List<Recipe> getByCuisine(String cuisine){

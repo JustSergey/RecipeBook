@@ -5,6 +5,7 @@ import java.util.List;
 
 public class AddRecipe implements CommandHandler {
     private int step;
+    private int permission;
     private String title;
     private String type;
     private String meal;
@@ -14,69 +15,72 @@ public class AddRecipe implements CommandHandler {
     private List<RecipeIngredient> recipeIngredients;
 
     public AddRecipe() {
-        step = 8;
+        step = 9;
+        permission = 1;
     }
 
-    public boolean execute(Message receivedMessage, Bot bot) {
+    public int getPermission() {
+        return permission;
+    }
+
+    public CommandHandler getInstance(){
+        return new AddRecipe();
+    }
+
+    public HandlerResult handle(Message receivedMessage, String data) {
         step--;
         switch (step) {
+            case 8:
+                return HandlerResult.getTextResult(receivedMessage, "Введите название", false);
             case 7:
-                title = receivedMessage.getText();
-                bot.sendMessage(receivedMessage, "Введите тип", null);
-                return true;
+                title = data;
+                return HandlerResult.getTextResult(receivedMessage, "Введите тип", false);
             case 6:
-                type = receivedMessage.getText();
-                bot.sendMessage(receivedMessage, "Введите трапезу", null);
-                return true;
+                type = data;
+                return HandlerResult.getTextResult(receivedMessage, "Введите трапезу", false);
             case 5:
-                meal = receivedMessage.getText();
-                bot.sendMessage(receivedMessage, "Введите кухню", null);
-                return true;
+                meal = data;
+                return HandlerResult.getTextResult(receivedMessage, "Введите кухню", false);
             case 4:
-                cuisine = receivedMessage.getText();
-                bot.sendMessage(receivedMessage, "Введите количество порций", null);
-                return true;
+                cuisine = data;
+                return HandlerResult.getTextResult(receivedMessage, "Введите количество порций", false);
             case 3:
                 try {
-                    portions = Integer.parseInt(receivedMessage.getText());
+                    portions = Integer.parseInt(data);
                 } catch (Exception e) {
                     portions = 0;
                 }
-                bot.sendMessage(receivedMessage, "Введите время готовки", null);
-                return true;
+                return HandlerResult.getTextResult(receivedMessage, "Введите время готовки", false);
             case 2:
-                time = receivedMessage.getText();
-                List<Ingredient> ingredients = bot.ingredientService.getAll();
-                bot.sendMessage(receivedMessage, getIngredientsInfo(ingredients), null);
-                return true;
+                time = data;
+                List<Ingredient> ingredients = Services.ingredientService.getAll();
+                return HandlerResult.getTextResult(receivedMessage, getIngredientsInfo(ingredients), false);
             case 1:
-                recipeIngredients = parseIngredients(receivedMessage.getText(), bot);
-                bot.sendMessage(receivedMessage, "Введите инструкцию", null);
-                return true;
+                recipeIngredients = parseIngredients(data);
+                return HandlerResult.getTextResult(receivedMessage, "Введите инструкцию", false);
             case 0:
-                String instruction = receivedMessage.getText();
-                User author = bot.getUser(receivedMessage.getChat().getUserName());
-                Recipe recipe = new Recipe(title, type, meal, cuisine, portions, time, instruction, author);
-                Recipe recipeDB = bot.recipeService.add(recipe);
+                User author = Services.getUser(receivedMessage.getChat().getUserName());
+                Recipe recipe = new Recipe(title, type, meal, cuisine, portions, time, data, author);
+                Recipe recipeDB = Services.recipeService.add(recipe);
                 for (RecipeIngredient recipeIngredient : recipeIngredients){
-                    bot.recipeIngredientService.add(new RecipeIngredient(recipeDB, recipeIngredient.getIngredient(), recipeIngredient.getAmount()));
+                    Services.recipeIngredientService.add(new RecipeIngredient(recipeDB, recipeIngredient.getIngredient(), recipeIngredient.getAmount()));
                 }
-                bot.sendMessage(receivedMessage, "Рецепт добавлен", null);
-                return false;
+                Services.recipeService.refresh(recipeDB);
+                return HandlerResult.getTextResult(receivedMessage, "Рецепт добавлен", true);
         }
-        return false;
+        return null;
     }
 
-    private List<RecipeIngredient> parseIngredients(String text, Bot bot) {
+    private List<RecipeIngredient> parseIngredients(String text) {
         String[] ingredients = text.split(";");
         List<RecipeIngredient> result = new ArrayList();
-        List<Ingredient> ingredientsDB = bot.ingredientService.getAll();
+        List<Ingredient> ingredientsDB = Services.ingredientService.getAll();
         for (String ingredient : ingredients) {
             String[] ingredientAmount = ingredient.split(":");
             if (ingredientAmount.length == 2 && ingredientAmount[0].length() > 0 && ingredientAmount[1].length() > 0) {
                 Ingredient ingredientDB = getIngredient(ingredientsDB, ingredientAmount[0]);
                 if (ingredientDB == null)
-                    ingredientDB = bot.ingredientService.add(new Ingredient(ingredientAmount[0]));
+                    ingredientDB = Services.ingredientService.add(new Ingredient(ingredientAmount[0]));
                 result.add(new RecipeIngredient(null, ingredientDB, ingredientAmount[1]));
             }
         }
@@ -84,10 +88,9 @@ public class AddRecipe implements CommandHandler {
     }
 
     private Ingredient getIngredient(List<Ingredient> ingredients, String title) {
-        for (Ingredient ingredient : ingredients){
+        for (Ingredient ingredient : ingredients)
             if (ingredient.getTitle().toLowerCase().equals((title.toLowerCase())))
                 return  ingredient;
-        }
         return null;
     }
 

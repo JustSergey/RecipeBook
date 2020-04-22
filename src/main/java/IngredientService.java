@@ -1,10 +1,13 @@
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class IngredientService {
-    public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
+    private EntityManager em;
+
+    public IngredientService(EntityManager em) {
+        this.em = em;
+    }
 
     public Ingredient add(Ingredient ingredient) {
         em.getTransaction().begin();
