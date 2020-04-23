@@ -73,7 +73,7 @@ public class AddRecipe implements CommandHandler {
 
     private List<RecipeIngredient> parseIngredients(String text) {
         String[] ingredients = text.split(";");
-        List<RecipeIngredient> result = new ArrayList();
+        List<RecipeIngredient> result = new ArrayList<>();
         List<Ingredient> ingredientsDB = Services.ingredientService.getAll();
         for (String ingredient : ingredients) {
             String[] ingredientAmount = ingredient.split(":");

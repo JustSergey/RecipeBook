@@ -1,4 +1,6 @@
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -36,33 +38,24 @@ public class Keyboards {
         return replyKeyboardMarkup;
     }
 
-    public static ReplyKeyboardMarkup getFiltersKeyboard(){
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setResizeKeyboard(true);
+    public static InlineKeyboardMarkup getInlineKeyboard(List<String> titles, List<String> ids){
+        if (titles.size() != ids.size())
+            return null;
 
-        List<KeyboardRow> keyboardRowList = new ArrayList<>();
-        KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add(new KeyboardButton("Кухня"));
-        keyboardRow.add(new KeyboardButton("Трапеза"));
-        keyboardRow.add(new KeyboardButton("Тип"));
-        keyboardRowList.add(keyboardRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRowList);
-        return replyKeyboardMarkup;
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        for (int i = 0; i < titles.size(); i++) {
+            List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(titles.get(i));
+            button.setCallbackData(ids.get(i));
+            buttonsRow.add(button);
+            buttons.add(buttonsRow);
+        }
+        return new InlineKeyboardMarkup(buttons);
     }
 
-    public static ReplyKeyboardMarkup getChosenFilterKeyboard(String ChosenFilter){
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-        List<KeyboardRow> keyboardRowList = new ArrayList<>();
-        KeyboardRow keyboardRow = new KeyboardRow();
-
+    public static InlineKeyboardMarkup getChosenFilterKeyboard(String ChosenFilter){
         List<String> chosenFilterButtons = Services.recipeService.getButtons(ChosenFilter);
-        for (String filterButton: chosenFilterButtons){
-            keyboardRow.add(new KeyboardButton(filterButton));
-        };
-        keyboardRowList.add(keyboardRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRowList);
-        return replyKeyboardMarkup;
+        return getInlineKeyboard(chosenFilterButtons, chosenFilterButtons);
     }
 }

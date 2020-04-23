@@ -46,7 +46,7 @@ public class RecipeService {
     public  List<Recipe> getByIngredients(String product){
         String query = "SELECT * from recipes \n" + "inner join recipesingredients as ri on recipes.id = ri.recipeid \n" +
                 "inner join ingredients  on ri.ingredientid = ingredients.id\n" +
-                "where ingredients.title = '"+product+"'";
+                "where ingredients.title = '" + product + "'";
         return em.createNativeQuery(query, Recipe.class).getResultList();
     }
 

@@ -1,6 +1,7 @@
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -28,7 +29,7 @@ public class HandlerResult {
         return new HandlerResult(sendMessage, isEnd);
     }
 
-    public static HandlerResult getTextResult(Message receivedMessage, String text, ReplyKeyboardMarkup keyboard, boolean isEnd) {
+    public static HandlerResult getTextResult(Message receivedMessage, String text, ReplyKeyboard keyboard, boolean isEnd) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(receivedMessage.getChatId());
         sendMessage.setText(text);
