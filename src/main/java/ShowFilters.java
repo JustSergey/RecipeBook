@@ -29,9 +29,9 @@ public class ShowFilters implements CommandHandler {
         switch (step) {
             case 2:
                 List<String> filters = new ArrayList<>();
-                filters.add("Кухня");
                 filters.add("Трапеза");
                 filters.add("Тип");
+                filters.add("Кухня");
                 List<String> ids = new ArrayList<>();
                 ids.add("1");
                 ids.add("2");
