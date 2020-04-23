@@ -21,8 +21,12 @@ public class MessageHandler {
         commands.put("Полный список", new FullList());
         commands.put("Добавить рецепт", new AddRecipe());
         commands.put("Удалить рецепт", new RemoveRecipe());
-        //commands.put("Поиск по фильтрам", new AddRecipe());
-        //commands.put("Поиск по ингредиентам", new AddRecipe());
+        commands.put("Поиск по фильтрам", new ShowFilters());
+        commands.put("Кухня", new FindByCuisine());
+        commands.put("Трапеза", new FindByMeal());
+        commands.put("Тип", new FindByType());
+        commands.put("Поиск по ингредиентам", new FindByIngredients());
+
     }
 
     public SendMessage handle(Message receivedMessage, String data, Type type){

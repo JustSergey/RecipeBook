@@ -1,34 +1,47 @@
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FindByIngredients implements CommandHandler {
     private int step;
-    public FindByIngredients(){step=1;}
+    private int permission;
 
+    public FindByIngredients() {
+        step = 2;
+        permission = 0;
+    }
 
+    public int getPermission() {
+        return permission;
+    }
 
-    public boolean execute(Message receivedMessage, Bot bot) {
+    public CommandHandler getInstance(){
+        return new FindByIngredients();
+    }
+
+    public HandlerResult handle(Message receivedMessage, String data) {
         step--;
-        switch(step){
-            case 0:
-
-                String product = receivedMessage.getText();
-                List<Recipe> recipes = bot.recipeService.getByIngredients(product);
-                if (recipes.isEmpty())
-                    bot.sendMessage(receivedMessage, "Рецептов с таким ингредиентом не найдено!",null);
-                else bot.sendRecipeList(receivedMessage,recipes);
-
-                ReplyKeyboardMarkup keyboard = bot.getStartKeyboard(receivedMessage.getChat().getUserName());
-                bot.sendMessage(receivedMessage, "Добро пожаловать в Книгу рецептов", keyboard);
-                return false;
+        if(step == 1 ){
+            List<Ingredient> ingredients = Services.ingredientService.getAll();
+            return HandlerResult.getTextResult(receivedMessage, getIngredientsInfo(ingredients), false);
         }
-        return false;
+        if (step == 0) {
+            String product = receivedMessage.getText();
+            List<Recipe> recipes = Services.recipeService.getByIngredients(product);
+            if (recipes.isEmpty())
+                return HandlerResult.getTextResult(receivedMessage, "Рецептов с таким ингредиентом не найдено!", false);
+            else
+                return HandlerResult.getRecipeListResult(receivedMessage, recipes, true);
+        }
+        return null;
+    }
+
+    private String getIngredientsInfo(List<Ingredient> ingredients) {
+        StringBuilder info = new StringBuilder("Список ингредиентов:\n");
+        for (Ingredient ingredient : ingredients){
+            info.append(ingredient.getTitle()).append("\n");
+        }
+        return info.toString();
     }
 }

@@ -53,7 +53,7 @@ public class Keyboards {
     public static ReplyKeyboardMarkup getChosenFilterKeyboard(String ChosenFilter){
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
-
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
         List<KeyboardRow> keyboardRowList = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
 

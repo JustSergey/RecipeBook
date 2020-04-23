@@ -1,30 +1,40 @@
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FindByCuisine implements CommandHandler {
     private int step;
-    public FindByCuisine(){step=1;}
+    private int permission;
 
+    public FindByCuisine() {
+        step = 3;
+        permission = 0;
+    }
 
+    public int getPermission() {
+        return permission;
+    }
 
-    public boolean execute(Message receivedMessage, Bot bot) {
+    public CommandHandler getInstance(){
+        return new FindByCuisine();
+    }
+
+    public HandlerResult handle(Message receivedMessage, String data) {
         step--;
-        switch(step){
-            case 0:
-                String cuisine = receivedMessage.getText();
-                List<Recipe> recipes = bot.recipeService.getByCuisine(cuisine);
-                bot.sendRecipeList(receivedMessage,recipes);
-                ReplyKeyboardMarkup keyboard = bot.getStartKeyboard(receivedMessage.getChat().getUserName());
-                bot.sendMessage(receivedMessage, "Добро пожаловать в Книгу рецептов", keyboard);
-                return false;
+        if(step == 2 ){
+            ReplyKeyboardMarkup keyboard = Keyboards.getChosenFilterKeyboard("cuisine");
+            return HandlerResult.getTextResult(receivedMessage, "Клавиатура обновлена", keyboard, false);
         }
-        return false;
+        if (step == 1) {
+            String cuisine = receivedMessage.getText();
+            List<Recipe> recipes = Services.recipeService.getByCuisine(cuisine);
+            return HandlerResult.getRecipeListResult(receivedMessage, recipes, false);
+        }
+        if (step == 0){
+            ReplyKeyboardMarkup keyboard = Keyboards.getStartKeyboard(receivedMessage.getChat().getUserName());
+            return HandlerResult.getTextResult(receivedMessage, "Добро пожаловать в Книгу рецептов", keyboard, true);
+        }
+        return null;
     }
 }
