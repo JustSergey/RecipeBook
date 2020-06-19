@@ -6,7 +6,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "Recipes")
-@NamedQuery(name = "Recipe.getAll", query = "SELECT r from Recipe r")
+@NamedQueries({
+        @NamedQuery(name = "Recipe.getAll", query = "SELECT r from Recipe r")})
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)

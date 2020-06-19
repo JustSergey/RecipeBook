@@ -4,21 +4,16 @@ public class Chat {
     private Long id;
     private CommandHandler handler;
 
-    public Chat(Long id, String command) {
+    public Chat(Long id, CommandHandler handler) {
         this.id = id;
-        switch (command){
-            case "AddRecipe":
-                handler = new AddRecipe();
-                break;
-            case "RemoveRecipe":
-                handler = new RemoveRecipe();
-                break;
-        }
+        this.handler = handler;
     }
 
-    public boolean execute(Message receivedMessage, Bot bot) {
-        return handler.execute(receivedMessage, bot);
+    public HandlerResult handle(Message receivedMessage, String data) {
+        return handler.handle(receivedMessage, data);
     }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 }

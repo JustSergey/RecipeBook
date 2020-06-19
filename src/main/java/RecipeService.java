@@ -1,16 +1,23 @@
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class RecipeService {
-    public EntityManager em = Persistence.createEntityManagerFactory("BOOK").createEntityManager();
+    private EntityManager em;
+
+    public RecipeService(EntityManager em) {
+        this.em = em;
+    }
 
     public Recipe add(Recipe recipe) {
         em.getTransaction().begin();
         Recipe recipeDB = em.merge(recipe);
         em.getTransaction().commit();
         return recipeDB;
+    }
+
+    public void refresh(Recipe recipe){
+        em.refresh(recipe);
     }
 
     public void delete(int id) {
@@ -24,7 +31,18 @@ public class RecipeService {
         return recipes.getResultList();
     }
 
-    public Recipe get(int id) {
-        return em.find(Recipe.class, id);
+    public List<String> getButtons(String filter){
+        String query = "SELECT DISTINCT(c."+filter+") from Recipe c";
+        TypedQuery<String> cuisines = em.createQuery(query, String.class);
+        return cuisines.getResultList();
+    }
+
+    public  List<Recipe> getByParameter(String parameter, String value){
+        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c." + parameter + " LIKE :" + parameter , Recipe.class)
+                .setParameter(parameter, value);
+        return recipes.getResultList();
+    }
+
+    public Recipe get(int id) {return em.find(Recipe.class, id);
     }
 }
