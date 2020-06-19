@@ -37,28 +37,9 @@ public class RecipeService {
         return cuisines.getResultList();
     }
 
-    public  List<Recipe> getByType(String type){
-        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.type LIKE :type" , Recipe.class)
-                .setParameter("type", type);
-        return recipes.getResultList();
-    }
-
-    public  List<Recipe> getByIngredients(String product){
-        String query = "SELECT * from recipes \n" + "inner join recipesingredients as ri on recipes.id = ri.recipeid \n" +
-                "inner join ingredients  on ri.ingredientid = ingredients.id\n" +
-                "where ingredients.title = '" + product + "'";
-        return em.createNativeQuery(query, Recipe.class).getResultList();
-    }
-
-    public  List<Recipe> getByCuisine(String cuisine){
-        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.cuisine LIKE :chosenCuisine" , Recipe.class)
-                .setParameter("chosenCuisine", cuisine);
-        return recipes.getResultList();
-    }
-
-    public  List<Recipe> getByMeal(String meal){
-        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c.meal LIKE :chosenMeal" , Recipe.class)
-                .setParameter("chosenMeal", meal);
+    public  List<Recipe> getByParameter(String parameter, String value){
+        TypedQuery<Recipe> recipes= em.createQuery("SELECT c From Recipe c WHERE c." + parameter + " LIKE :" + parameter , Recipe.class)
+                .setParameter(parameter, value);
         return recipes.getResultList();
     }
 

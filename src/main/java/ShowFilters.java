@@ -3,16 +3,23 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 public class ShowFilters implements CommandHandler {
     private int step;
     private int permission;
     private String filter;
+    private Dictionary<String, String> info;
 
     public ShowFilters() {
         step = 3;
         permission = 0;
+        info = new Hashtable<>();
+        info.put("meal", "трапезу");
+        info.put("type", "тип");
+        info.put("cuisine", "кухню");
     }
 
     public int getPermission() {
@@ -28,46 +35,15 @@ public class ShowFilters implements CommandHandler {
         InlineKeyboardMarkup keyboard;
         switch (step) {
             case 2:
-                List<String> filters = new ArrayList<>();
-                filters.add("Трапеза");
-                filters.add("Тип");
-                filters.add("Кухня");
-                List<String> ids = new ArrayList<>();
-                ids.add("1");
-                ids.add("2");
-                ids.add("3");
-                keyboard = Keyboards.getInlineKeyboard(filters, ids);
+                keyboard = Keyboards.getFiltersKeyboard();
                 return HandlerResult.getTextResult(receivedMessage, "Выберите фильтр:", keyboard, false);
             case 1:
-                switch (data) {
-                    case "1":
-                        filter = "meal";
-                        keyboard = Keyboards.getChosenFilterKeyboard(filter);
-                        return HandlerResult.getTextResult(receivedMessage, "Выберите трапезу", keyboard, false);
-                    case "2":
-                        filter = "type";
-                        keyboard = Keyboards.getChosenFilterKeyboard(filter);
-                        return HandlerResult.getTextResult(receivedMessage, "Выберите тип", keyboard, false);
-                    case "3":
-                        filter = "cuisine";
-                        keyboard = Keyboards.getChosenFilterKeyboard(filter);
-                        return HandlerResult.getTextResult(receivedMessage, "Выберите кухню", keyboard, false);
-                }
-                return null;
+                filter = data;
+                keyboard = Keyboards.getChosenFilterKeyboard(filter);
+                return HandlerResult.getTextResult(receivedMessage, "Выберите " + info.get(filter), keyboard, false);
             case 0:
-                List<Recipe> recipes;
-                switch (filter) {
-                    case "meal":
-                        recipes = Services.recipeService.getByMeal(data);
-                        return HandlerResult.getRecipeListResult(receivedMessage, recipes, true);
-                    case "type":
-                        recipes = Services.recipeService.getByType(data);
-                        return HandlerResult.getRecipeListResult(receivedMessage, recipes, true);
-                    case "cuisine":
-                        recipes = Services.recipeService.getByCuisine(data);
-                        return HandlerResult.getRecipeListResult(receivedMessage, recipes, true);
-                }
-                return null;
+                List<Recipe> recipes = Services.recipeService.getByParameter(filter, data);
+                return HandlerResult.getRecipeListResult(receivedMessage, recipes, true);
         }
         return null;
     }

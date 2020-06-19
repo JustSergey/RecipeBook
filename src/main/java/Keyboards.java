@@ -54,8 +54,20 @@ public class Keyboards {
         return new InlineKeyboardMarkup(buttons);
     }
 
-    public static InlineKeyboardMarkup getChosenFilterKeyboard(String ChosenFilter){
-        List<String> chosenFilterButtons = Services.recipeService.getButtons(ChosenFilter);
+    public static InlineKeyboardMarkup getFiltersKeyboard(){
+        List<String> filters = new ArrayList<>();
+        filters.add("Трапеза");
+        filters.add("Тип");
+        filters.add("Кухня");
+        List<String> ids = new ArrayList<>();
+        ids.add("meal");
+        ids.add("type");
+        ids.add("cuisine");
+        return getInlineKeyboard(filters, ids);
+    }
+
+    public static InlineKeyboardMarkup getChosenFilterKeyboard(String filter){
+        List<String> chosenFilterButtons = Services.recipeService.getButtons(filter);
         return getInlineKeyboard(chosenFilterButtons, chosenFilterButtons);
     }
 }
